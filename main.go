@@ -11,7 +11,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-
 func main() {
 	r := Results{
 		Licenses: []License{},
@@ -58,11 +57,15 @@ func (r *Results) titleFromIndex(i int) string {
 	return r.Licenses[i].Title
 }
 
-func (r *Results) getFuzzyOptions() fuzzyfinder.Option{
+func (r *Results) textFromIndex(i int) string {
+	return r.Licenses[i].Text
+}
+
+func (r *Results) getFuzzyOptions() fuzzyfinder.Option {
 	return fuzzyfinder.WithPreviewWindow(func(i, w, h int) string {
-		if i < 0 {
-			return ""
+		if i >= 0 {
+			return r.textFromIndex(i)
 		}
-		return r.Licenses[i].Text
+		return ""
 	})
 }
