@@ -2,6 +2,10 @@
 
 A license maker?
 
+## Preview
+
+https://youtu.be/NB-r-jcFtJY
+
 ## Build
 
 ```
