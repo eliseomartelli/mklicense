@@ -35,21 +35,22 @@ func (r *Results) walker(path string, d fs.DirEntry, err error) error {
 	if err != nil {
 		return err
 	}
-	if !d.IsDir() {
-		// It's a file!
-		file, err := fs.ReadFile(LicensesDir, path)
-		if err != nil {
-			return err
-		}
-		processed := strings.Split(string(file), "---")
-		license := License{}
-		err = yaml.Unmarshal([]byte(processed[1]), &license)
-		if err != nil {
-			return err
-		}
-		license.Text = strings.TrimSpace(processed[2])
-		r.Licenses = append(r.Licenses, license)
+	if d.IsDir() {
+		return nil
 	}
+	// It's a file!
+	file, err := fs.ReadFile(LicensesDir, path)
+	if err != nil {
+		return err
+	}
+	processed := strings.Split(string(file), "---")
+	license := License{}
+	err = yaml.Unmarshal([]byte(processed[1]), &license)
+	if err != nil {
+		return err
+	}
+	license.Text = strings.TrimSpace(processed[2])
+	r.Licenses = append(r.Licenses, license)
 	return nil
 }
 
