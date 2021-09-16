@@ -1,7 +1,6 @@
 package main
 
 import (
-	"embed"
 	"fmt"
 	"io/fs"
 	"log"
@@ -12,38 +11,20 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type License struct {
-	Title  string `yaml:"title"`
-	Spdxid string `yaml:"spdx-id"`
-	Text   string
-}
-
-type Results struct {
-	Licenses []License
-}
-
-//go:embed licenses
-var licensesFiles embed.FS
 
 func main() {
 	r := Results{
 		Licenses: []License{},
 	}
-	err := fs.WalkDir(licensesFiles, ".", r.walker)
+	err := fs.WalkDir(LicensesDir, ".", r.walker)
 	if err != nil {
 		log.Fatalf("Fatal error. %v", err)
 	}
 	idx, err := fuzzyfinder.Find(
 		r.Licenses,
-		func(i int) string {
-			return r.Licenses[i].Title
-		},
-		fuzzyfinder.WithPreviewWindow(func(i, w, h int) string {
-			if i == -1 {
-				return ""
-			}
-			return fmt.Sprintf("%s", r.Licenses[i].Text)
-		}))
+		r.titleFromIndex,
+		r.getFuzzyOptions(),
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -57,7 +38,7 @@ func (r *Results) walker(path string, d fs.DirEntry, err error) error {
 	}
 	if !d.IsDir() {
 		// It's a file!
-		file, err := fs.ReadFile(licensesFiles, path)
+		file, err := fs.ReadFile(LicensesDir, path)
 		if err != nil {
 			return err
 		}
@@ -71,4 +52,17 @@ func (r *Results) walker(path string, d fs.DirEntry, err error) error {
 		r.Licenses = append(r.Licenses, license)
 	}
 	return nil
+}
+
+func (r *Results) titleFromIndex(i int) string {
+	return r.Licenses[i].Title
+}
+
+func (r *Results) getFuzzyOptions() fuzzyfinder.Option{
+	return fuzzyfinder.WithPreviewWindow(func(i, w, h int) string {
+		if i < 0 {
+			return ""
+		}
+		return r.Licenses[i].Text
+	})
 }
