@@ -28,7 +28,7 @@ func main() {
 		log.Fatal(err)
 	}
 	os.WriteFile("LICENSE", []byte(r.Licenses[idx].Text), 0660)
-	fmt.Println("Open LICENSE file and change author.")
+	fmt.Printf("Instructions: \n\n%s\n\nNote: LICENSE file already created.\n", r.Licenses[idx].How)
 }
 
 func (r *Results) walker(path string, d fs.DirEntry, err error) error {
@@ -57,14 +57,11 @@ func (r *Results) titleFromIndex(i int) string {
 	return r.Licenses[i].Title
 }
 
-func (r *Results) textFromIndex(i int) string {
-	return r.Licenses[i].Text
-}
 
 func (r *Results) getFuzzyOptions() fuzzyfinder.Option {
 	return fuzzyfinder.WithPreviewWindow(func(i, w, h int) string {
 		if i >= 0 {
-			return r.textFromIndex(i)
+			return r.Licenses[i].Text
 		}
 		return ""
 	})
