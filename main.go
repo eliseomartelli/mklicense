@@ -25,6 +25,10 @@ func main() {
 		r.getFuzzyOptions(),
 	)
 	if err != nil {
+		if err == fuzzyfinder.ErrAbort {
+			fmt.Printf("Aborted.\n")
+			return
+		}
 		log.Fatal(err)
 	}
 	os.WriteFile("LICENSE", []byte(r.Licenses[idx].Text), 0660)
